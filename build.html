@@ -1,1 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Image to AES Encryptor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      textarea {
+        width: 100%;
+        height: 150px;
+        margin-top: 10px;
+        font-family: monospace;
+      }
+      .output-group {
+        margin-top: 20px;
+        background: #f4f4f4;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      input[type='text'],
+      input[type='file'] {
+        margin-bottom: 15px;
+        width: 100%;
+      }
+      label {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Image Encryptor</h2>
 
+      <label>1. Select Image:</label><br />
+      <input type="file" id="imageInput" accept="image/*" /><br />
+
+      <label>2. Set Password (Key):</label><br />
+      <input type="text" id="passphrase" placeholder="e.g. 1234-ABCD" /><br />
+
+      <button onclick="encryptImage()">Encrypt Image</button>
+
+      <div class="output-group">
+        <label>Your New sigBytes (Update your code with this):</label>
+        <p id="sigBytesDisplay">0</p>
+
+        <label>Encrypted String (Paste into &lt;textarea&gt;):</label>
+        <textarea id="resultText" readonly></textarea>
+      </div>
+    </div>
+
+    <script>
+      function encryptImage() {
+        const fileInput = document.getElementById('imageInput')
+        const passphrase = document.getElementById('passphrase').value
+        const resultText = document.getElementById('resultText')
+        const sigBytesDisplay = document.getElementById('sigBytesDisplay')
+
+        if (!fileInput.files[0] || !passphrase) {
+          alert('Please select a file and enter a password.')
+          return
+        }
+
+        const reader = new FileReader()
+        reader.onload = function (e) {
+          // Convert file to WordArray
+          const arrayBuffer = e.target.result
+          const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer)
+
+          // Log the original size (sigBytes)
+          sigBytesDisplay.innerText = wordArray.sigBytes
+
+          // Encrypt using AES
+          const encrypted = CryptoJS.AES.encrypt(wordArray, passphrase)
+
+          // The .toString() method defaults to OpenSSL compatible Base64
+          resultText.value = encrypted.toString()
+        }
+
+        reader.readAsArrayBuffer(fileInput.files[0])
+      }
+    </script>
+  </body>
+</html>
